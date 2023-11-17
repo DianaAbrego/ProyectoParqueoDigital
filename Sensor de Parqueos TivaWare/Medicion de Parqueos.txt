@@ -1,0 +1,92 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include "inc/tm4c123gh6pm.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
+#include "inc/hw_ints.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/gpio.h"
+#include "driverlib/timer.h"
+#include "driverlib/uart.h"
+
+#define GREEN1 GPIO_PIN_1     //PD_1
+#define RED1 GPIO_PIN_2      //PD_2
+#define LDR1 GPIO_PIN_0      //PD_0
+
+#define GREEN2 GPIO_PIN_1     //PE_1
+#define RED2 GPIO_PIN_2      //PE_2
+#define LDR2 GPIO_PIN_3      //PE_3
+
+#define GREEN3 GPIO_PIN_5    //PA_5
+#define RED3 GPIO_PIN_6      //PA_6
+#define LDR3 GPIO_PIN_4      //PB_4
+
+#define GREEN4 GPIO_PIN_4    //PE_4
+#define RED4 GPIO_PIN_5      //PE_5
+#define LDR4 GPIO_PIN_5      //PB_5
+
+
+int main(void){
+    SysCtlClockSet(SYSCTL_SYSDIV_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);       //OSC CON 40MHz
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);                                            //TURN PORTF ON
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+
+    //LED PINS CONFIG
+    GPIOPinTypeGPIOOutput(GPIO_PORTD_BASE, RED1|GREEN1);        //LEDS S1
+    GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, RED2|GREEN2);        //LEDS S2
+    GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, RED3|GREEN3);        //LEDS S3
+    GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, RED4|GREEN4);        //LEDS S4
+
+    //LDR CONFIG
+    GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, LDR1);                //LDR S1
+    GPIOPadConfigSet(GPIO_PORTD_BASE, LDR1, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
+
+    GPIOPinTypeGPIOInput(GPIO_PORTE_BASE, LDR2);                //LDR S2
+    GPIOPadConfigSet(GPIO_PORTE_BASE, LDR2, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
+
+    GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, LDR3);                //LDR S3
+    GPIOPadConfigSet(GPIO_PORTB_BASE, LDR3, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
+
+    GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, LDR4);                //LDR S4
+    GPIOPadConfigSet(GPIO_PORTB_BASE, LDR4, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
+
+
+while (1) {
+
+    if(GPIOPinRead(GPIO_PORTD_BASE, LDR1)==1){          //LECTURA S1
+        GPIOPinWrite(GPIO_PORTD_BASE, RED1, RED1);
+        GPIOPinWrite(GPIO_PORTD_BASE, GREEN1, 0);
+    }else{
+        GPIOPinWrite(GPIO_PORTD_BASE, GREEN1, GREEN1);
+        GPIOPinWrite(GPIO_PORTD_BASE, RED1, 0);
+    }
+
+    if(GPIOPinRead(GPIO_PORTE_BASE, LDR2)==0){          //LECTURA S2
+        GPIOPinWrite(GPIO_PORTE_BASE, RED2, RED2);
+        GPIOPinWrite(GPIO_PORTE_BASE, GREEN2, 0);
+    }else{
+        GPIOPinWrite(GPIO_PORTE_BASE, GREEN2, GREEN2);
+        GPIOPinWrite(GPIO_PORTE_BASE, RED2, 0);
+    }
+
+    if(GPIOPinRead(GPIO_PORTB_BASE, LDR3)==0){          //LECTURA S3
+        GPIOPinWrite(GPIO_PORTA_BASE, RED3, RED3);
+        GPIOPinWrite(GPIO_PORTA_BASE, GREEN3, 0);
+    }else{
+        GPIOPinWrite(GPIO_PORTA_BASE, GREEN3, 0xFF);
+        GPIOPinWrite(GPIO_PORTA_BASE, RED3, 0);
+    }
+
+    if(GPIOPinRead(GPIO_PORTB_BASE, LDR4)==0){          //LECTURA S4
+            GPIOPinWrite(GPIO_PORTE_BASE, RED4, RED4);
+            GPIOPinWrite(GPIO_PORTE_BASE, GREEN4, 0);
+        }else{
+            GPIOPinWrite(GPIO_PORTE_BASE, GREEN4, GREEN4);
+            GPIOPinWrite(GPIO_PORTE_BASE, RED4, 0);
+        }
+
+    } //FIN WHILE
+}
